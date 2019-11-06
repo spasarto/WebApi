@@ -94,6 +94,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// </summary>
         /// <returns></returns>
         IDictionary<string, string> ODataContentIdMapping { get; }
+        /// <summary>
+        /// Looks up the referenced objects during a deep insert request.
+        /// There may be a better way to do this, but I'm not sure what it would be.
+        /// </summary>
+        IDictionary<string, Func<object>> ODataContentIdResolvers { get; set; }
 
         /// <summary>
         /// Get the path handler associated with the request.

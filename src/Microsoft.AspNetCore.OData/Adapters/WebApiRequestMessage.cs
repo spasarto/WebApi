@@ -181,10 +181,8 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Gets a list of content Id mappings associated with the request.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, string> ODataContentIdMapping
-        {
-            get { return null; }
-        }
+        public IDictionary<string, string> ODataContentIdMapping { get; }
+        public IDictionary<string, Func<object>> ODataContentIdResolvers { get; set; } = new Dictionary<string, Func<object>>();
 
         /// <summary>
         /// Gets the path handler associated with the request.

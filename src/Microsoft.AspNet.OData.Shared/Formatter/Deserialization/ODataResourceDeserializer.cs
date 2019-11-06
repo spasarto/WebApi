@@ -326,7 +326,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
                 if (entityReferenceLink != null)
                 {
-                    // ignore entity reference links.
+                    var contentId = entityReferenceLink.EntityReferenceLink.Url.ToString().Replace("$", "");
+                    if (readContext.InternalRequest.ODataContentIdResolvers.TryGetValue(contentId, out Func<object> resolver))
+                    {
+                        string propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
+
+                        DeserializationHelpers.SetProperty(resource, propertyName, resolver());
+                    }
+                    
                     continue;
                 }
 
@@ -410,8 +417,22 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
         {
+            ApplyContentId(resource, resourceWrapper, readContext);
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
+        }
+
+        private void ApplyContentId(object resource, ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext)
+        {
+            var contentId = resourceWrapper.Resource.InstanceAnnotations
+                            .Where(a => string.Equals("odata.contentid", a.Name, StringComparison.OrdinalIgnoreCase))
+                            .Select(a => a.Value.GetInnerValue()?.ToString())
+                            .FirstOrDefault();
+
+            if (contentId != null)
+            {
+                readContext.InternalRequest.ODataContentIdResolvers[contentId] = () => resource;
+            }
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,
@@ -588,9 +609,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmStructuredTypeReference structuredType = edmType.AsCollection().ElementType().AsStructured();
             var nestedReadContext = new ODataDeserializerContext
             {
+                Request = readContext.Request,
                 Path = readContext.Path,
                 Model = readContext.Model,
             };
+            nestedReadContext.InternalRequest.ODataContentIdResolvers = readContext.InternalRequest.ODataContentIdResolvers;
 
             if (readContext.IsUntyped)
             {
