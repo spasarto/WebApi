@@ -306,6 +306,21 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
+            IList linkedContent = null;
+            string propertyName = null;
+            if (edmProperty != null)
+            {
+                propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
+                var property = resource.GetType().GetProperty(propertyName);
+
+                if (property.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                {
+                    var collectionType = property.PropertyType.GetGenericArguments()[0];
+
+                    linkedContent = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionType));
+                }
+            }
+
             foreach (ODataItemBase childItem in resourceInfoWrapper.NestedItems)
             {
                 // it maybe null.
@@ -329,11 +344,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     var contentId = entityReferenceLink.EntityReferenceLink.Url.ToString().Replace("$", "");
                     if (readContext.InternalRequest.ODataContentIdResolvers.TryGetValue(contentId, out Func<object> resolver))
                     {
-                        string propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
+                        object value = resolver();
 
-                        DeserializationHelpers.SetProperty(resource, propertyName, resolver());
+                        if (linkedContent == null)
+                            DeserializationHelpers.SetProperty(resource, propertyName, value);
+                        else
+                            linkedContent.Add(value);
                     }
-                    
+
                     continue;
                 }
 
@@ -368,6 +386,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
             }
+
+            if(linkedContent != null && linkedContent.Count > 0)
+                DeserializationHelpers.SetProperty(resource, propertyName, linkedContent);
         }
 
         /// <summary>
