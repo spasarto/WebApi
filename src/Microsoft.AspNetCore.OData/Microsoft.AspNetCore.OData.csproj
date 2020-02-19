@@ -10,17 +10,17 @@
     <RootNamespace>Microsoft.AspNet.OData</RootNamespace>
     <!-- Let's generate our own assembly info -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU1608;NU1701</NoWarn>
   </PropertyGroup>
   <Import Project="..\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Desktop.Analyzers" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.6.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.6.1" />
+
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
@@ -31,7 +31,6 @@
     <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.Hashing.Algorithms.Analyzers" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,5 +62,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.OData.Core\Microsoft.OData.Core.NetStandard.VS2017.csproj" />
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.NetStandard.VS2017.csproj" />
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.Spatial\Microsoft.Spatial.NetStandard.VS2017.csproj" />
   </ItemGroup>
 </Project>

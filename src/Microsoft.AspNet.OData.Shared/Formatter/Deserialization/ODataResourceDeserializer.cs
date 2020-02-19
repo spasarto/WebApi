@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
@@ -20,13 +21,17 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// </summary>
     public class ODataResourceDeserializer : ODataEdmTypeDeserializer
     {
+        private readonly ExternalResourceEntityReferenceLinkResolver _externalResourceEntityReferenceLinkResolver;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataResourceDeserializer"/> class.
         /// </summary>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
-        public ODataResourceDeserializer(ODataDeserializerProvider deserializerProvider)
+        /// <param name="externalResourceEntityReferenceLinkResolver">The resolver to use for resolving external resources.</param>
+        public ODataResourceDeserializer(ODataDeserializerProvider deserializerProvider, ExternalResourceEntityReferenceLinkResolver externalResourceEntityReferenceLinkResolver)
             : base(ODataPayloadKind.Resource, deserializerProvider)
         {
+            _externalResourceEntityReferenceLinkResolver = externalResourceEntityReferenceLinkResolver;
         }
 
         /// <inheritdoc />
@@ -308,6 +313,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             IList linkedContent = null;
             string propertyName = null;
+            Type resourceType = null;
             if (edmProperty != null)
             {
                 propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
@@ -315,9 +321,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if (property.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
                 {
-                    var collectionType = property.PropertyType.GetGenericArguments()[0];
+                    resourceType = property.PropertyType.GetGenericArguments()[0];
 
-                    linkedContent = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionType));
+                    linkedContent = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(resourceType));
+                }
+                else
+                {
+                    resourceType = property.PropertyType;
                 }
             }
 
@@ -341,16 +351,29 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
                 if (entityReferenceLink != null)
                 {
-                    var contentId = entityReferenceLink.EntityReferenceLink.Url.ToString().Replace("$", "");
-                    if (readContext.InternalRequest.ODataContentIdResolvers.TryGetValue(contentId, out Func<object> resolver))
+                    try
                     {
-                        object value = resolver();
+                        var contentId = entityReferenceLink.EntityReferenceLink.Url.ToString().Replace("$", "");
+                        if (readContext.InternalRequest.ODataContentIdResolvers.TryGetValue(contentId, out Func<object> resolver))
+                        {
+                            object value = resolver();
 
-                        if (linkedContent == null)
-                            DeserializationHelpers.SetProperty(resource, propertyName, value);
-                        else
-                            linkedContent.Add(value);
+                            if (linkedContent == null)
+                                DeserializationHelpers.SetProperty(resource, propertyName, value);
+                            else
+                                linkedContent.Add(value);
+                        }
+                        else if (Uri.TryCreate(contentId, UriKind.RelativeOrAbsolute, out Uri uri))
+                        {
+                            var value = _externalResourceEntityReferenceLinkResolver.Resolve(uri, resourceType);
+
+                            if (linkedContent == null)
+                                DeserializationHelpers.SetProperty(resource, propertyName, value);
+                            else
+                                linkedContent.Add(value);
+                        }
                     }
+                    catch { }
 
                     continue;
                 }

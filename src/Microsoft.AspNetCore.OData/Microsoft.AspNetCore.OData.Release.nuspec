@@ -3,7 +3,7 @@
   <metadata>
     <id>Microsoft.AspNetCore.OData</id>
     <title>Microsoft ASP.NET Core 2.0 for OData v4.0</title>
-    <version>$VersionNuGetSemantic$</version>
+    <version>7.2.2.31108-contentid5</version>
     <authors>Microsoft</authors>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
     <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC and to support OData query syntax for your web APIs.</description>
@@ -17,17 +17,17 @@
     <iconUrl>http://static.tumblr.com/hgchgxz/9ualgdf98/icon.png</iconUrl>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="$AspNetCorePackageDependency$" />
-        <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjection2PackageDependency$" />
-        <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
+        <dependency id="Microsoft.AspNetCore.Mvc.Core" version="2.0.0" />
+        <dependency id="Microsoft.Extensions.DependencyInjection" version="2.0.0" />
+        <dependency id="Microsoft.OData.Core" version="7.6.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.dll" target="lib\netstandard2.0" />
-    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.pdb" target="lib\netstandard2.0" />
-    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.xml" target="lib\netstandard2.0" />
-    <file src="$SourcesRoot$\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
-    <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
+    <file src="C:\Users\Adam\source\repos\github\WebApi\bin\Release\netstandard2.0\Microsoft.AspNetCore.OData.dll" target="lib\netstandard2.0" />
+    <file src="C:\Users\Adam\source\repos\github\WebApi\bin\Release\netstandard2.0\Microsoft.AspNetCore.OData.pdb" target="lib\netstandard2.0" />
+    <file src="C:\Users\Adam\source\repos\github\WebApi\bin\Release\netstandard2.0\Microsoft.AspNetCore.OData.xml" target="lib\netstandard2.0" />
+    <file src="C:\Users\Adam\source\repos\github\WebApi\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
+    <file src="C:\Users\Adam\source\repos\github\WebApi\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
   </files>
 </package>

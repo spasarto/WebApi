@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
@@ -83,10 +84,12 @@ namespace Microsoft.AspNet.OData.Extensions
             // Binders.
             builder.AddService<ODataQuerySettings>(ServiceLifetime.Scoped);
             builder.AddService<FilterBinder>(ServiceLifetime.Transient);
+            builder.AddService<ExternalResourceEntityReferenceLinkResolver>(ServiceLifetime.Singleton);
 
             // HttpRequestScope.
             builder.AddService<HttpRequestScope>(ServiceLifetime.Scoped);
             builder.AddService(ServiceLifetime.Scoped, sp => sp.GetRequiredService<HttpRequestScope>().HttpRequest);
+
             return builder;
         }
     }
